@@ -116,7 +116,7 @@ static int draw_fps(cv::Mat& rgb)
 
 	return 0;
 }
-int maindepth() {
+int main() {
 	const std::string path = "your model path + \\depth.xml";
 
 	printf("start \n");
