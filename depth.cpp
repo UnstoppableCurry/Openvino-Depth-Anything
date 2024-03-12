@@ -5,10 +5,10 @@
 
 /*
 PaddedResizedImage  Depth::paddingAndResize(const cv::Mat& img, int img_len) {
-	// ç¡®å®šéœ€è¦å¡«å……çš„è¾¹é•¿ä»¥ä½¿å›¾åƒæˆä¸º1:1çš„çºµæ¨ªæ¯”
+	// È·¶¨ĞèÒªÌî³äµÄ±ß³¤ÒÔÊ¹Í¼Ïñ³ÉÎª1:1µÄ×İºá±È
 	int maxSide = std::max(img.cols, img.rows);
 
-	// è®¡ç®—æ°´å¹³å’Œå‚ç›´æ–¹å‘ä¸Šçš„å¡«å……å¤§å°
+	// ¼ÆËãË®Æ½ºÍ´¹Ö±·½ÏòÉÏµÄÌî³ä´óĞ¡
 	int deltaWidth = maxSide - img.cols;
 	int deltaHeight = maxSide - img.rows;
 	int top = deltaHeight / 2;
@@ -16,11 +16,11 @@ PaddedResizedImage  Depth::paddingAndResize(const cv::Mat& img, int img_len) {
 	int left = deltaWidth / 2;
 	int right = deltaWidth - left;
 
-	// å¡«å……å›¾åƒ
+	// Ìî³äÍ¼Ïñ
 	cv::Mat squareImg;
 	cv::copyMakeBorder(img, squareImg, top, bottom, left, right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 
-	// è°ƒæ•´å¡«å……åçš„å›¾åƒå¤§å°åˆ° img_len x img_len
+	// µ÷ÕûÌî³äºóµÄÍ¼Ïñ´óĞ¡µ½ img_len x img_len
 	cv::Mat resizedImg;
 	cv::resize(squareImg, resizedImg, cv::Size(img_len, img_len));
 
@@ -47,7 +47,7 @@ cv::Mat Depth::inference(cv::Mat img,int h,int w)
 	float* detections = output_tensor.data<float>();
 	output_shape[0] = h;
 	output_shape[1] = w;
-	// åˆ›å»ºä¸€ä¸ªä¸æ¨ç†ç»“æœå½¢çŠ¶ç›¸åŒ¹é…çš„ cv::Mat å¯¹è±¡
+	// ´´½¨Ò»¸öÓëÍÆÀí½á¹ûĞÎ×´ÏàÆ¥ÅäµÄ cv::Mat ¶ÔÏó
 	cv::Mat resultMat(output_shape[0], output_shape[1], CV_32FC1);
 	std::memcpy(resultMat.data, detections, output_shape[0] * output_shape[1] * sizeof(float));
 	cv::Mat color_map_ = cv::Mat(h, w, CV_8UC3);
@@ -55,7 +55,7 @@ cv::Mat Depth::inference(cv::Mat img,int h,int w)
 	cv::normalize(resultMat, resultMat, 0, 255, cv::NORM_MINMAX, CV_8UC1);
 	cv::applyColorMap(resultMat, color_map_, cv::ColormapTypes::COLORMAP_INFERNO);
 
-	// å°†æ•°æ®å¤„ç†ä¸º uint8 å¹¶ç¼©æ”¾åˆ° [0, 255]
+	// ½«Êı¾İ´¦ÀíÎª uint8 ²¢Ëõ·Åµ½ [0, 255]
 	//cv::Mat resultMatUint8;
 	//resultMat.convertTo(resultMatUint8, CV_8U, 255.0);
 	result.image = color_map_;
@@ -101,7 +101,7 @@ static int draw_fps(cv::Mat& rgb)
 	}
 
 	char text[32];
-	//sprintf(text, "FPS=%.2f", avg_fps);
+	sprintf(text, "FPS=%.2f", avg_fps);
 
 	int baseLine = 0;
 	cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
@@ -116,20 +116,22 @@ static int draw_fps(cv::Mat& rgb)
 
 	return 0;
 }
-int main() {
-	const std::string path = "your model path + \\depth.xml";
+int maindepth() {
+	const std::string path = "H:\\vsworkspace\\AperturePluginInferCPP\\x64\\Release\\mo\\depth\\depth.xml";
+	//std::string path = "H:\\\\vsworkspace\\\\ocr_sdk\\\\x64\\\\Release\\\\mo\\\\det_16\\\\det.xml";
 
+	std::string imgpath = "H:\\vsworkspace\\ocr_sdk\\x64\\Release\\img\\12.jpg";
 	printf("start \n");
 	Depth* depth = new Depth(path, "CPU");
-	cv::Mat frame;   //å£°æ˜ä¸€ä¸ªä¿å­˜å›¾åƒçš„ç±»
-	cv::VideoCapture video;   //ç”¨VideoCaptureæ¥è¯»å–æ‘„åƒå¤´
-	video.open(0);   //æ‹¬å·çš„0è¡¨ç¤ºä½¿ç”¨ç”µè„‘è‡ªå¸¦çš„æ‘„åƒå¤´
+	cv::Mat frame;   //ÉùÃ÷Ò»¸ö±£´æÍ¼ÏñµÄÀà
+	cv::VideoCapture video;   //ÓÃVideoCaptureÀ´¶ÁÈ¡ÉãÏñÍ·
+	video.open(0);   //À¨ºÅµÄ0±íÊ¾Ê¹ÓÃµçÄÔ×Ô´øµÄÉãÏñÍ·
 
-	while (1)   //ï¼ˆè¯»å–æˆåŠŸï¼Œä½¿ç”¨å¾ªç¯è¯­å¥å°†è§†é¢‘ä¸€å¸§ä¸€å¸§åœ°å±•ç¤ºå‡ºæ¥ï¼‰
+	while (1)   //£¨¶ÁÈ¡³É¹¦£¬Ê¹ÓÃÑ­»·Óï¾ä½«ÊÓÆµÒ»Ö¡Ò»Ö¡µØÕ¹Ê¾³öÀ´£©
 	{
 		video >> frame;
 		cv::Mat result = depth->inference(frame, 518, 518);
-		draw_fps(frame); // åœ¨å¸§ä¸Šç»˜åˆ¶FPSä¿¡æ¯
+		draw_fps(frame); // ÔÚÖ¡ÉÏ»æÖÆFPSĞÅÏ¢
 		cv::imshow("frame", frame);
 		cv::imshow("result", result);
 		cv::waitKey(1);
