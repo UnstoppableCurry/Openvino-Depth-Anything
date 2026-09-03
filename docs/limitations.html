@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>局限 · Openvino-Depth-Anything</title>
+  <meta name="description" content="明确列出本仓库与本静态站不能声称的事项：无在线演示、无精度/FPS 数字、无可用截图、无构建与权重。">
+  <link rel="canonical" href="https://unstoppablecurry.github.io/Openvino-Depth-Anything/limitations.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="16x16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Noto+Serif+SC:wght@600;700&display=swap">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">public / cpp</span>
+      <span class="brand-title">Openvino-Depth-Anything</span>
+    </a>
+    <nav class="site-nav" aria-label="站点导航">
+      <a href="index.html">概览</a>
+      <a href="architecture.html">结构</a>
+      <a href="usage.html">用法</a>
+      <a href="limitations.html" aria-current="page">局限</a>
+      <a href="https://github.com/UnstoppableCurry/Openvino-Depth-Anything">GitHub</a>
+    </nav>
+  </header>
+  <div class="rule" aria-hidden="true"><hr></div>
+  <main id="content" class="page">
+    <p class="kicker">未测量 · 未附带 · 未承诺</p>
+    <h1>这份仓库证明不了什么</h1>
+    <p class="deck">说明页如果写得像产品站，就会超出源码。下面把“仓库里没有的东西”写清楚，避免被读成评测或案例。</p>
+
+    <div class="caution">
+      <p><strong>不是演示。</strong> 打开本站不会访问摄像头，也不会加载 Depth Anything 或 OpenVINO。深度图只可能出现在你本机编译运行之后的 OpenCV 窗口里。</p>
+    </div>
+
+    <h2>本站与仓库都没有的内容</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>类别</th>
+          <th>仓库与本站的实际情况</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>精度 / 质量</td>
+          <td>没有任何定量评测、数据集名称或“准确率”陈述。</td>
+        </tr>
+        <tr>
+          <td>速度</td>
+          <td><code>draw_fps()</code> 只在运行时往画面上画文字。README 和源码都没有写下测得的 FPS。</td>
+        </tr>
+        <tr>
+          <td>截图</td>
+          <td>README 的 <code>![Uploading 捕获.PNG…]()</code> 是破损上传占位，不是结果图。本站不发明替代图。</td>
+        </tr>
+        <tr>
+          <td>权重 / ONNX / IR</td>
+          <td>仓库不含模型文件。README 提到的 <code>depth_anything_vits14.onnx</code> 需要自行取得并转换。</td>
+        </tr>
+        <tr>
+          <td>客户或生产</td>
+          <td>没有任何部署、客户、上线或产品化描述。</td>
+        </tr>
+        <tr>
+          <td>构建系统</td>
+          <td>没有 CMake、msbuild 工程、依赖版本或 <code>main()</code>。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>从源码能直接看到的限制</h2>
+    <ul>
+      <li><strong>Windows 痕迹：</strong> <code>windows.h</code>、<code>SetConsoleOutputCP</code>、以及 <code>H:\vsworkspace\...</code> 路径。</li>
+      <li><strong>入口不是 <code>main</code>：</strong> 可执行入口是 <code>maindepth()</code>，仓库没有给出谁调用它。</li>
+      <li><strong>路径与设备写死：</strong> 换机器必须改源码；README 的“set your model path / camera”与当前实现并不对应成配置文件。</li>
+      <li><strong>摄像头 <code>0</code>：</strong> 打不开设备时，循环仍会 <code>video &gt;&gt; frame</code> 并推理，源码没有检查 <code>open</code> 是否成功。</li>
+      <li><strong>编译失败可被吞掉：</strong> <code>compileModel()</code> 捕获异常后只打印，不中止构造。</li>
+      <li><strong>输出尺寸改写：</strong> <code>Depth::inference</code> 把 <code>output_shape[0/1]</code> 设为传入的 <code>h/w</code>，再按这个尺寸 <code>memcpy</code>。源码没有核对 OpenVINO 实际输出形状是否匹配。</li>
+    </ul>
+
+    <h2>和 Depth Anything 论文 / 官方实现的关系</h2>
+    <p>仓库文件名、ONNX 文件名 <code>depth_anything_vits14.onnx</code> 以及 README 标题式用法表明目标是 Depth Anything 的 ViT-S/14 导出模型。仓库没有包含论文引用、官方权重来源、许可证说明，也没有声明自己实现了训练或完整算法。</p>
+
+    <h2>本静态站还缺什么</h2>
+    <p>合并之后，仓库 Settings → Pages 的 Source 需要设成 <strong>GitHub Actions</strong>，工作流才会往 <a href="https://unstoppablecurry.github.io/Openvino-Depth-Anything/">https://unstoppablecurry.github.io/Openvino-Depth-Anything/</a> 发布 <code>docs/</code>。在此之前，上面这个地址可能仍是空的。</p>
+    <p>站点只使用相对路径引用页面和样式，以便挂在项目子路径 <code>/Openvino-Depth-Anything/</code> 下。它不托管模型，也不执行 C++。</p>
+
+    <p><a href="usage.html">← 用法</a> · <a href="index.html">回概览</a></p>
+  </main>
+  <footer class="site-footer">
+    <div class="rule-top">
+      <p>事实来源：<code>README.md</code> 与四份 C++ 文件；上表“没有”的项以仓库当前文件集合为准。</p>
+      <p><a href="https://github.com/UnstoppableCurry/Openvino-Depth-Anything">源代码仓库</a></p>
+    </div>
+  </footer>
+</body>
+</html>

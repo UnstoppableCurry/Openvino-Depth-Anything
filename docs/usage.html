@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>用法 · Openvino-Depth-Anything</title>
+  <meta name="description" content="按 README 原文整理的运行备忘，并标出源码里写死的模型路径、CPU 设备和摄像头 0。本页不能代替本机环境。">
+  <link rel="canonical" href="https://unstoppablecurry.github.io/Openvino-Depth-Anything/usage.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="16x16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Noto+Serif+SC:wght@600;700&display=swap">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">public / cpp</span>
+      <span class="brand-title">Openvino-Depth-Anything</span>
+    </a>
+    <nav class="site-nav" aria-label="站点导航">
+      <a href="index.html">概览</a>
+      <a href="architecture.html">结构</a>
+      <a href="usage.html" aria-current="page">用法</a>
+      <a href="limitations.html">局限</a>
+      <a href="https://github.com/UnstoppableCurry/Openvino-Depth-Anything">GitHub</a>
+    </nav>
+  </header>
+  <div class="rule" aria-hidden="true"><hr></div>
+  <main id="content" class="page">
+    <p class="kicker">README 运行备忘</p>
+    <h1>本机才能跑，页面上跑不了</h1>
+    <p class="deck">README 只有四步，且没有安装、编译或依赖清单。下面原样列出这四步，再用源码补充它没写清、但已经写死的值。</p>
+    <div class="caution">
+      <p>在这个 GitHub Pages 站点上执行不了推理。需要本机的 OpenVINO（含 Model Optimizer <code>mo</code>）、ONNX 模型文件、转换后的 IR（源码读取 <code>depth.xml</code>）、可用的摄像头，以及能编译这些 C++ 文件的环境。</p>
+    </div>
+
+    <h2>README 原文步骤</h2>
+    <ol class="pipeline">
+      <li>
+        <span class="step">1</span>
+        <div>
+          <strong>onnx2ir</strong>
+          <span>把 ONNX 转成 OpenVINO IR。</span>
+        </div>
+      </li>
+      <li>
+        <span class="step">2</span>
+        <div>
+          <strong>set your model path</strong>
+          <span>自行设置模型路径。README 没有给出推荐目录。</span>
+        </div>
+      </li>
+      <li>
+        <span class="step">3</span>
+        <div>
+          <strong>set your camera</strong>
+          <span>自行设置摄像头。README 没有写设备索引。</span>
+        </div>
+      </li>
+      <li>
+        <span class="step">4</span>
+        <div>
+          <strong>run ~</strong>
+          <span>运行。README 没有写编译命令或可执行文件名。</span>
+        </div>
+      </li>
+    </ol>
+
+    <h2>README 里的转换命令</h2>
+    <pre><code>mo --input_model="depth_anything_vits14.onnx" --output_dir="./" --model_name="depth"    --compress_to_fp16 --input_shape=[1,3,518,518]</code></pre>
+    <p class="caption">命令按 <code>README.md</code> 逐字复制，包括空格。仓库不包含 <code>depth_anything_vits14.onnx</code>，也不包含转换产物。</p>
+    <p>从这行能确定的只有：输入文件名是 <code>depth_anything_vits14.onnx</code>，输出模型名是 <code>depth</code>，压缩到 FP16，静态形状 <code>[1,3,518,518]</code>。Model Optimizer 成功时通常会写出 <code>depth.xml</code> 与配套的 bin；<code>maindepth()</code> 读取的正是 <code>depth.xml</code>。</p>
+
+    <h2>源码里已经写死的值</h2>
+    <p>README 说“设置路径 / 摄像头”，但 <code>maindepth()</code> 目前是硬编码，改源码或自己另写入口才能换机器。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>项目</th>
+          <th>源码中的值</th>
+          <th>位置</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>IR 路径</td>
+          <td><code>H:\vsworkspace\AperturePluginInferCPP\x64\Release\mo\depth\depth.xml</code></td>
+          <td><code>depth.cpp</code> · <code>maindepth()</code></td>
+        </tr>
+        <tr>
+          <td>设备</td>
+          <td><code>"CPU"</code></td>
+          <td>同上，传给 <code>Depth(path, "CPU")</code></td>
+        </tr>
+        <tr>
+          <td>摄像头</td>
+          <td><code>video.open(0)</code></td>
+          <td>同上；注释写的是“电脑自带的摄像头”</td>
+        </tr>
+        <tr>
+          <td>推理尺寸</td>
+          <td><code>inference(frame, 518, 518)</code></td>
+          <td>同上</td>
+        </tr>
+        <tr>
+          <td>显示窗口</td>
+          <td><code>frame</code>、<code>result</code></td>
+          <td><code>cv::imshow</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>同函数里还有一个未使用的 <code>imgpath</code>，指向另一份本地 JPEG。循环并没有读这个文件，只用摄像头帧。</p>
+
+    <h2>依赖（头文件能看到的）</h2>
+    <ul>
+      <li><code>&lt;openvino/openvino.hpp&gt;</code> — OpenVINO C++ API</li>
+      <li><code>&lt;opencv2/opencv.hpp&gt;</code> — OpenCV（采集、缩放、伪彩色、窗口）</li>
+      <li><code>&lt;windows.h&gt;</code> — Windows；<code>SetConsoleOutputCP</code></li>
+    </ul>
+    <p>仓库没有写出版本号、安装方式和链接参数。无法从本仓库单独得出“在某系统上一键编译”的步骤。</p>
+
+    <h2>README 中的破损图片</h2>
+    <div class="broken-figure">
+      <p>README 第 10 行是 <code>![Uploading 捕获.PNG…]()</code>。这是未完成的图片上传占位，括号里没有 URL。它不能当作深度结果、界面截图或性能图。本页不补图。</p>
+    </div>
+
+    <p><a href="architecture.html">← 结构</a> · <a href="limitations.html">局限 →</a></p>
+  </main>
+  <footer class="site-footer">
+    <div class="rule-top">
+      <p>事实来源：<code>README.md</code>、<code>depth.cpp</code>、<code>OpenvinoEngine.h</code>。</p>
+      <p><a href="index.html">返回概览</a></p>
+    </div>
+  </footer>
+</body>
+</html>

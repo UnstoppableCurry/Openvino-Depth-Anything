@@ -1,0 +1,18 @@
+name: Check docs
+
+on:
+  pull_request:
+  push:
+    paths:
+      - "docs/**"
+      - "scripts/check-docs.py"
+      - ".github/workflows/docs-check.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify docs
+        run: python3 scripts/check-docs.py
