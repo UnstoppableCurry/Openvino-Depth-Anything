@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>概览 · Openvino-Depth-Anything</title>
+  <meta name="description" content="本仓库公开 C++ 源码，用 OpenVINO 对 Depth Anything 做推理。本页是静态说明，不是摄像头或深度估计演示。">
+  <link rel="canonical" href="https://unstoppablecurry.github.io/Openvino-Depth-Anything/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="16x16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Noto+Serif+SC:wght@600;700&display=swap">
+  <link rel="stylesheet" href="assets/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": "Openvino-Depth-Anything",
+    "description": "使用 OpenVINO 对 Depth Anything 做推理的公开 C++ 源码。本页为静态说明，不是在线演示。",
+    "codeRepository": "https://github.com/UnstoppableCurry/Openvino-Depth-Anything",
+    "programmingLanguage": "C++",
+    "url": "https://unstoppablecurry.github.io/Openvino-Depth-Anything/"
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#content">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">public / cpp</span>
+      <span class="brand-title">Openvino-Depth-Anything</span>
+    </a>
+    <nav class="site-nav" aria-label="站点导航">
+      <a href="index.html" aria-current="page">概览</a>
+      <a href="architecture.html">结构</a>
+      <a href="usage.html">用法</a>
+      <a href="limitations.html">局限</a>
+      <a href="https://github.com/UnstoppableCurry/Openvino-Depth-Anything">GitHub</a>
+    </nav>
+  </header>
+  <div class="rule" aria-hidden="true"><hr></div>
+  <main id="content" class="page">
+    <div class="lede-grid">
+      <aside class="stamp" aria-label="站点性质">
+        静态 GitHub Pages
+        <strong>不是演示</strong>
+        无摄像头 · 无模型
+      </aside>
+      <article>
+        <p class="kicker">仓库说明页</p>
+        <h1>用 OpenVINO 跑 Depth Anything 的 C++ 源码</h1>
+        <p class="deck">这是公开仓库 <a href="https://github.com/UnstoppableCurry/Openvino-Depth-Anything">UnstoppableCurry/Openvino-Depth-Anything</a> 的静态说明。内容只来自仓库里的 <code>README.md</code> 和四份 C++ 源文件，不补充未出现的指标或截图。</p>
+        <div class="caution">
+          <p><strong>本站不是实时摄像头 / 深度估计演示。</strong> 浏览器里看不到深度图。要复现仓库行为，需要本机安装 OpenVINO、按 README 把 ONNX 转成 IR、自行设置模型路径和摄像头，再编译运行 C++ 程序。</p>
+        </div>
+        <ul class="fact-strip" aria-label="仓库内可核对的事实">
+          <li>语言：C++</li>
+          <li>推理：OpenVINO</li>
+          <li>模型名：depth_anything_vits14.onnx</li>
+          <li>转换形状：[1,3,518,518]</li>
+          <li>可视化：COLORMAP_INFERNO</li>
+        </ul>
+
+        <h2>仓库里实际有什么</h2>
+        <p>当前公开文件就是一份短运行说明，加上推理封装和深度后处理源码。没有构建脚本、没有模型权重、也没有可用的结果图。</p>
+        <ul class="file-list">
+          <li><code>README.md</code> — 四步运行备忘：ONNX 转 IR、设模型路径、设摄像头、运行。</li>
+          <li><code>OpenvinoEngine.h</code> / <code>OpenvinoEngine.cpp</code> — 读 IR、预处理、同步推理。</li>
+          <li><code>depth.h</code> / <code>depth.cpp</code> — 方形填充缩放、推理、伪彩色、摄像头循环。</li>
+        </ul>
+
+        <div class="broken-figure">
+          <p><strong>README 里的图不是结果图。</strong> 原文是破损的 Markdown 上传占位 <code>![Uploading 捕获.PNG…]()</code>，链接为空。本站不把它当成截图，也不另做一张“效果图”充数。</p>
+        </div>
+
+        <h2>能从源码确认的流程</h2>
+        <ol class="pipeline">
+          <li>
+            <span class="step">01</span>
+            <div>
+              <strong>转模型</strong>
+              <span>README 使用 OpenVINO Model Optimizer：<code>mo --input_model="depth_anything_vits14.onnx" … --input_shape=[1,3,518,518]</code>，输出名 <code>depth</code>，并 <code>--compress_to_fp16</code>。</span>
+            </div>
+          </li>
+          <li>
+            <span class="step">02</span>
+            <div>
+              <strong>编译 IR</strong>
+              <span><code>OpenvinoEngine::compileModel()</code> 读取 XML，用 PrePostProcessor 把输入从 BGR / NHWC / u8 转到 RGB / NCHW / f32，并按 255 做 scale，再 <code>compile_model</code>。</span>
+            </div>
+          </li>
+          <li>
+            <span class="step">03</span>
+            <div>
+              <strong>摄像头循环</strong>
+              <span><code>maindepth()</code> 用 <code>cv::VideoCapture</code> 打开设备 <code>0</code>，每帧调用 <code>Depth::inference(..., 518, 518)</code>，窗口名是 <code>frame</code> 与 <code>result</code>。</span>
+            </div>
+          </li>
+        </ol>
+        <p class="caption">以上逐步对应 README 与 <code>depth.cpp</code> / <code>OpenvinoEngine.h</code>。仓库没有公布帧率、精度或部署案例。</p>
+
+        <div class="two-col">
+          <section class="panel">
+            <h2>继续读</h2>
+            <p><a href="architecture.html">结构</a>：类、预处理和入口函数怎么串起来。</p>
+            <p><a href="usage.html">用法</a>：README 原步骤，以及源码里写死的路径与设备。</p>
+            <p><a href="limitations.html">局限</a>：本站不声称、源码未证明、以及 Windows 痕迹。</p>
+          </section>
+          <section class="panel">
+            <h2>本站明确不包含</h2>
+            <p>没有在线推理、没有模型下载、没有准确率或 FPS 数字、没有客户或生产环境描述、没有用生成图冒充运行结果。</p>
+          </section>
+        </div>
+      </article>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="rule-top">
+      <p>事实来源：<code>README.md</code>、<code>OpenvinoEngine.h</code>、<code>OpenvinoEngine.cpp</code>、<code>depth.h</code>、<code>depth.cpp</code>。</p>
+      <p>页面地址（合并并启用 GitHub Actions 作为 Pages 源之后）：<a href="https://unstoppablecurry.github.io/Openvino-Depth-Anything/">https://unstoppablecurry.github.io/Openvino-Depth-Anything/</a></p>
+    </div>
+  </footer>
+</body>
+</html>

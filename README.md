@@ -1,3 +1,5 @@
+静态说明页（不是在线演示）：https://unstoppablecurry.github.io/Openvino-Depth-Anything/
+
 1.onnx2ir
 mo --input_model="depth_anything_vits14.onnx" --output_dir="./" --model_name="depth"    --compress_to_fp16 --input_shape=[1,3,518,518]
 2.
