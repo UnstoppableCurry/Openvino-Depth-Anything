@@ -261,11 +261,13 @@ h3 {
 }
 
 .fact-strip li {
+  max-width: 100%;
   padding: 0.35rem 0.65rem;
   border: 1px solid var(--rule);
   background: var(--paper-2);
   font-family: var(--type-mono);
   font-size: 0.82rem;
+  overflow-wrap: anywhere;
 }
 
 .source-box,
